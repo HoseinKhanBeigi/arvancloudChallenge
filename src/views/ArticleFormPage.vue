@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import Header from '@/components/Header.vue'
 import DashboardSidebar from '@/components/DashboardSidebar.vue'
@@ -31,16 +31,13 @@ import FormArticle from '@/components/FormArticle.vue'
 import { fetcherWrapper } from '@/composables/useFetcherWrapper'
 import { API_BASE_URL } from '@/config/api'
 import { useNotification } from '@/composables/useNotification'
+import { useArticleForm } from '@/composables/useArticleForm'
+import { fetchArticle, createArticle, updateArticle } from '@/api/articles'
 
 const route = useRoute()
+const router = useRouter()
 const isEdit = !!route.params.slug
-const form = ref({
-    title: '',
-    description: '',
-    body: '',
-    selectedTags: []
-})
-const showErrors = ref(false)
+const { form, showErrors, resetForm, validateForm } = useArticleForm()
 const drawerOpen = ref(false)
 const loading = ref(false)
 const { notify } = useNotification()
@@ -53,16 +50,15 @@ function closeDrawer() {
     drawerOpen.value = false
 }
 
-async function fetchArticle(slug) {
+async function loadArticle(slug) {
     loading.value = true
     try {
-        const { data, error } = await fetcherWrapper(`${API_BASE_URL}/articles/${slug}`)
+        const { data, error } = await fetchArticle(slug)
         if (error) throw new Error(error)
-        const article = data.article
-        form.value.title = article.title || ''
-        form.value.description = article.description || ''
-        form.value.body = article.body || ''
-        form.value.selectedTags = article.tagList || []
+        form.value.title = data.article.title || ''
+        form.value.description = data.article.description || ''
+        form.value.body = data.article.body || ''
+        form.value.selectedTags = data.article.tagList || []
     } catch (e) {
         notify({ message: e.message || 'Error loading article for editing.', type: 'error' })
     } finally {
@@ -72,51 +68,39 @@ async function fetchArticle(slug) {
 
 onMounted(() => {
     if (isEdit) {
-        fetchArticle(route.params.slug)
+        loadArticle(route.params.slug)
     }
 })
 
 async function handleSubmit() {
     loading.value = true
     showErrors.value = true
-    if (
-        !form.value.title ||
-        !form.value.description ||
-        !Array.isArray(form.value.selectedTags) ||
-        !form.value.selectedTags.length
-    ) {
+    if (!validateForm()) {
         notify({ message: 'Please fill in all fields and select at least one tag.', type: 'error' })
         loading.value = false
         return
     }
     try {
-        let url, method, body
+        let result
         if (isEdit) {
-            url = `${API_BASE_URL}/articles/${route.params.slug}`
-            method = 'PUT'
-            body = {
+            result = await updateArticle(route.params.slug, {
                 title: form.value.title,
                 description: form.value.description,
                 body: form.value.body,
                 tagList: form.value.selectedTags
-            }
+            })
         } else {
-            url = `${API_BASE_URL}/articles`
-            method = 'POST'
-            body = {
-                article: {
-                    title: form.value.title,
-                    description: form.value.description,
-                    body: form.value.body,
-                    tagList: form.value.selectedTags
-                }
-            }
+            result = await createArticle({
+                title: form.value.title,
+                description: form.value.description,
+                body: form.value.body,
+                tagList: form.value.selectedTags
+            })
         }
-        const { data, error } = await fetcherWrapper(url, { method, body })
-        if (error) throw new Error(error)
+        if (result.error) throw new Error(result.error)
         notify({ message: isEdit ? 'Article updated!' : 'Article created! Tags: ' + form.value.selectedTags.join(', '), type: 'success' })
-        form.value = { title: '', description: '', body: '', selectedTags: [] }
-        showErrors.value = false
+        resetForm()
+        router.push('/articles')
     } catch (e) {
         notify({ message: e.message || (isEdit ? 'Error updating article. Please try again.' : 'Error creating article. Please try again.'), type: 'error' })
     } finally {

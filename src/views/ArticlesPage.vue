@@ -173,10 +173,10 @@ async function confirmDelete() {
   try {
     const { error: deleteError } = await fetcherWrapper(`${API_BASE_URL}/articles/${articleToDelete.value}`, { method: 'DELETE' })
     if (deleteError) throw new Error(deleteError)
-    articles.value = articles.value.filter(a => a.slug !== articleToDelete.value)
+    await fetchArticles()
     notify({ message: 'Article deleted!', type: 'success' })
   } catch (e) {
-    notify({ message: 'Error deleting article.', type: 'error' })
+    notify({ message: e.message , type: 'error' })
   } finally {
     showDeleteModal.value = false
     articleToDelete.value = null
