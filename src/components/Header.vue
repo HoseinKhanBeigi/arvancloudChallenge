@@ -43,7 +43,6 @@ function handleResize() {
 }
 
 function toggleDrawer() {
-  console.log('toggleDrawer')
   emit('toggle-drawer')
 }
 
