@@ -16,9 +16,14 @@ export async function fetcherWrapper(url, { method = 'GET', body, headers = {}, 
       ...(body ? { body: JSON.stringify(body) } : {}),
       ...rest
     })
-    data = await response.json()
-    if (!response.ok) {
-      error = data.errors ? Object.values(data.errors).join(' ') : data.message || response.statusText
+    if (response.status === 204) {
+      data = null
+      error = null
+    } else {
+      data = await response.json()
+      if (!response.ok) {
+        error = data.errors ? Object.values(data.errors).join(' ') : data.message || response.statusText
+      }
     }
   } catch (e) {
     error = e.message || 'Network error'
