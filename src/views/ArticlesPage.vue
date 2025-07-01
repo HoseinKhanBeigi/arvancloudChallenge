@@ -1,10 +1,10 @@
 <template>
   <MainLayout>
     <template #header>
-      <Header />
+      <Header :sidebar-open="drawerOpen" @toggle-drawer="toggleDrawer" />
     </template>
     <template #sidebar>
-      <DashboardSidebar />
+      <DashboardSidebar :drawer-open="drawerOpen" @close-drawer="closeDrawer" />
     </template>
     <div class="articles-container">
 
@@ -221,6 +221,10 @@ function handleDelete(slug) {
 }
 
 const { tooltip, showTooltip, hideTooltip } = useTooltip()
+
+const drawerOpen = ref(false)
+function toggleDrawer() { drawerOpen.value = !drawerOpen.value }
+function closeDrawer() { drawerOpen.value = false }
 
 onMounted(() => {
   fetchArticles()
