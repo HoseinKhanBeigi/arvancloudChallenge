@@ -18,6 +18,7 @@
         @focus="handleFocus"
         @blur="handleBlur"
         rows="6"
+        :style="minHeight ? { minHeight: typeof minHeight === 'number' ? minHeight + 'px' : minHeight } : {}"
       />
     </template>
     <template v-else>
@@ -71,6 +72,10 @@ const props = defineProps({
   errorMessage: {
     type: String,
     default: 'This field is required'
+  },
+  minHeight: {
+    type: [String, Number],
+    default: null
   }
 })
 

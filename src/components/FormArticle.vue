@@ -1,18 +1,18 @@
 <template>
   <div class="new-article-root">
-    <h2>New Article</h2>
+    <h2 class="new-article-title">New Article</h2>
     <form class="article-form" @submit.prevent="onSubmit">
-      <div class="form-group">
+      <div class="form-group title">
         <label for="title">Title</label>
         <InputField id="title" v-model="localForm.title" placeholder="Enter article title" :has-error="showErrors && !localForm.title" error-message="Title is required" />
       </div>
-      <div class="form-group">
+      <div class="form-group description">
         <label for="description">Description</label>
         <InputField id="description" v-model="localForm.description" placeholder="Enter a short description" :has-error="showErrors && !localForm.description" error-message="Description is required" />
       </div>
-      <div class="form-group">
+      <div class="form-group body-group">
         <label for="body">Body</label>
-        <InputField id="body" v-model="localForm.body" type="textarea" placeholder="Write your article..." />
+        <InputField id="body" v-model="localForm.body" type="textarea" placeholder="Write your article..." :minHeight="220" />
       </div>
       <Button class="submit-btn" type="submit" variant="primary" size="medium" :loading="props.loading">
         {{ props.isEdit ? 'Update Article' : 'Create Article' }}
@@ -86,6 +86,11 @@ function onSubmit() {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   padding: 2rem 2.5rem 2.5rem 2.5rem;
 }
+.new-article-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000000;
+}
 .article-form {
   display: flex;
   flex-direction: column;
@@ -110,5 +115,23 @@ function onSubmit() {
 }
 .submit-btn:hover {
   background: linear-gradient(135deg, #009595 0%, #018FE1 100%);
+}
+
+.title label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #000000;
+}
+
+.description label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
+}
+
+.body-group label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #000000;
 }
 </style> 
