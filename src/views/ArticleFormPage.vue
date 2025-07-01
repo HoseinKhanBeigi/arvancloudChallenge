@@ -104,10 +104,12 @@ async function handleSubmit() {
             url = `${API_BASE_URL}/articles`
             method = 'POST'
             body = {
-                title: form.value.title,
-                description: form.value.description,
-                body: form.value.body,
-                tagList: form.value.selectedTags
+                article: {
+                    title: form.value.title,
+                    description: form.value.description,
+                    body: form.value.body,
+                    tagList: form.value.selectedTags
+                }
             }
         }
         const { data, error } = await fetcherWrapper(url, { method, body })
